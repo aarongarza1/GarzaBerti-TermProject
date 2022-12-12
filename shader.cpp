@@ -70,8 +70,7 @@ bool Shader::AddShader(GLenum ShaderType)
           \
           smooth in vec3 color; \
           in vec2 tc;\
-          in vec3 texcoords;\
-          uniform bool isCubemap\
+          uniform bool isCubemap;\
           uniform bool hasTexture;\
           \
           out vec4 frag_color; \
@@ -81,8 +80,6 @@ bool Shader::AddShader(GLenum ShaderType)
              if(hasTexture)\
                frag_color = texture2D(sp,tc);\
             \
-            else if(isCubemap)\
-                frag_colr = texture(cube_texture, texcoords);\
             else\
 			   frag_color = vec4(color.rgb, 1.0);\
           } \
