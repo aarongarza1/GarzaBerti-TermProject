@@ -1,8 +1,8 @@
 #include "graphics.h"
 
-Graphics::Graphics()
+Graphics::Graphics(int x)
 {
-
+	gameMode = x;
 }
 
 Graphics::~Graphics()

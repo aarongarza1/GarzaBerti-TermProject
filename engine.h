@@ -29,7 +29,7 @@ class Engine
     Engine(const char*  name, int width, int height);
     
     ~Engine();
-    bool Initialize();
+    bool Initialize(int x);
     void Run();
     void ProcessInput();
     unsigned int getDT();

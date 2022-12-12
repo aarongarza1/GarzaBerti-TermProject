@@ -20,7 +20,7 @@ using namespace std;
 class Graphics
 {
   public:
-    Graphics();
+    Graphics(int x);
     ~Graphics();
     bool Initialize(int width, int height);
     void HierarchicalUpdate2(double dt);
@@ -40,7 +40,7 @@ class Graphics
 
     Camera *m_camera;
     Shader *m_shader;
-
+    int gameMode;
     GLint m_projectionMatrix;
     GLint m_viewMatrix;
     GLint m_modelMatrix;
