@@ -11,6 +11,7 @@ using namespace std;
 #include "object.h"
 #include "sphere.h"
 #include "mesh.h"
+#include "Cubemap.h"
 
 #define numVBOs 2;
 #define numIBs 2;
@@ -49,6 +50,7 @@ class Graphics
     GLint m_hasTexture;
     GLint m_isCubemap;
 
+    Object* cubemap;
     Sphere* m_sun;
     Sphere* m_earth;
     Sphere* m_moon;
@@ -62,6 +64,7 @@ class Graphics
     Sphere* m_uranus;
     Sphere* m_venus;
     Mesh* m_mesh;
+    Sphere* m_skybox;
 
 
 

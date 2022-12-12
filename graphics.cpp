@@ -96,7 +96,8 @@ bool Graphics::Initialize(int width, int height)
 	m_saturn = new Sphere(48, "assets\\Saturn.jpg");
 	m_uranus = new Sphere(48, "assets\\Uranus.jpg");
 	m_venus = new Sphere(48, "assets\\Venus.jpg");
-
+	m_skybox = new Sphere(68, "assets\\spacetry3.jpg");
+	//m_skybox = new Cubemap(glm::vec3(0., 0., 0.), "assets\\17520.jpg");
 
 	glUniform1i(m_isCubemap, false);
 	//enable depth testing
@@ -295,7 +296,13 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 
 	modelStack.pop();	// empy stack
-
+	modelStack.push(glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 0)));  // sun's coordinate
+	localTransform = modelStack.top();		// The sun origin
+	//localTransform *= glm::rotate(glm::mat4(1.0f), (float)dt, glm::vec3(0.f, 1.f, 0.f));
+	localTransform *= glm::scale(glm::vec3(50., 50., 50.));
+	if (m_skybox != NULL)
+		m_skybox->Update(localTransform);
+	modelStack.pop();
 }
 
 
@@ -363,6 +370,22 @@ void Graphics::Render()
 			}
 			glUniform1i(sampler, 0);
 			m_sun->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+		}
+	}
+	if (m_skybox != NULL) {
+		glUniform1i(m_hasTexture, false);
+		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_skybox->GetModel()));
+		if (m_skybox->hasTex) {
+			glUniform1i(m_hasTexture, true);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, m_skybox->getTextureID());
+			GLuint sampler = m_shader->GetUniformLocation("sp");
+			if (sampler == INVALID_UNIFORM_LOCATION)
+			{
+				printf("Sampler Not found not found\n");
+			}
+			glUniform1i(sampler, 0);
+			m_skybox->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
 	if (m_venus != NULL) {
