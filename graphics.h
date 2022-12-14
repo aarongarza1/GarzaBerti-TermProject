@@ -65,7 +65,7 @@ class Graphics
     Sphere* m_venus;
     Mesh* m_mesh;
     Sphere* m_skybox;
-
+    std::vector<Mesh*> asteroidBelt;
 
 
 };

@@ -98,7 +98,26 @@ bool Graphics::Initialize(int width, int height)
 	m_venus = new Sphere(48, "assets\\Venus.jpg");
 	m_skybox = new Sphere(68, "assets\\spacetry3.jpg");
 	//m_skybox = new Cubemap(glm::vec3(0., 0., 0.), "assets\\17520.jpg");
-
+	for (int i = 0; i < 50; i++)
+	{
+		Mesh* aster = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast1.obj", "assets\\ast1tex.png");
+		asteroidBelt.push_back(aster);
+	}
+	for (int i = 0; i < 50; i++)
+	{
+		Mesh* aster = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast2.obj", "assets\\ast2tex.png");
+		asteroidBelt.push_back(aster);
+	}
+	for (int i = 0; i < 50; i++)
+	{
+		Mesh* aster = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast3.obj", "assets\\ast3tex.png");
+		asteroidBelt.push_back(aster);
+	}
+	for (int i = 0; i < 50; i++)
+	{
+		Mesh* aster = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast4.obj", "assets\\ast4tex.png");
+		asteroidBelt.push_back(aster);
+	}
 	glUniform1i(m_isCubemap, false);
 	//enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -154,7 +173,23 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	if (m_mercury != NULL)
 		m_mercury->Update(localTransform);
 	modelStack.pop();
-
+	for(int i = 0; i < asteroidBelt.size(); i++){
+		// position of the first planet
+		speed = { .2, .2, .2 };
+		dist = { -30., 3, -30. };
+		rotVector = { 1.,1.,1. };
+		rotSpeed = { 1., 1., 1. };
+		scale = { .5,.5,.5 };
+		localTransform = modelStack.top();				// start with sun's coordinate
+		localTransform *= glm::translate(glm::mat4(1.f),
+			glm::vec3((.73 * cos(speed[0] * dt)) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
+		modelStack.push(localTransform);			// store planet-sun coordinate
+		localTransform *= glm::rotate(glm::mat4(1.f), rotSpeed[0] * (float)dt, rotVector);
+		localTransform *= glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
+		if (asteroidBelt[i] != NULL)
+			asteroidBelt[i]->Update(localTransform);
+		modelStack.pop();
+	}
 	// position of the second planet
 	speed = { .26, .26, .26 };
 	dist = { 10., 0, 10. };
@@ -371,6 +406,23 @@ void Graphics::Render()
 			glUniform1i(sampler, 0);
 			m_sun->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
+	}
+	for (int i = 0; i < asteroidBelt.size(); i++) {
+		if (asteroidBelt[i] != NULL){}
+			glUniform1i(m_hasTexture, false);
+			glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(asteroidBelt[i]->GetModel()));
+			if (asteroidBelt[i]->hasTex) {
+				glUniform1i(m_hasTexture, true);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, asteroidBelt[i]->getTextureID());
+				GLuint sampler = m_shader->GetUniformLocation("sp");
+				if (sampler == INVALID_UNIFORM_LOCATION)
+				{
+					printf("Sampler Not found not found\n");
+				}
+				glUniform1i(sampler, 0);
+				asteroidBelt[i]->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+			}
 	}
 	if (m_skybox != NULL) {
 		glUniform1i(m_hasTexture, false);
