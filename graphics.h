@@ -45,10 +45,26 @@ class Graphics
     GLint m_projectionMatrix;
     GLint m_viewMatrix;
     GLint m_modelMatrix;
+    GLint m_normalMatrix;
     GLint m_positionAttrib;
     GLint m_colorAttrib;
     GLint m_tcAttrib;
     GLint m_hasTexture;
+
+    //light stuff
+    GLint globalAmbLoc;
+    GLint lightALoc;
+    GLint lightDLoc;
+    GLint lightSLoc;
+    GLint lightPosLoc;
+
+    GLint mAmbLoc;
+    GLint mDiffLoc;
+    GLint mNormLoc;
+    GLint mSpecLoc;
+    GLint mShineLoc;
+
+    GLint hasN;
 
     Object* cubemap;
     Sphere* m_sun;

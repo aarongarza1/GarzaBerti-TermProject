@@ -106,7 +106,7 @@ bool Graphics::Initialize(int width, int height)
 	m_mesh = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\SpaceShip-1.obj", "assets\\SpaceShip-1.png");
 
 	// The Sun
-	m_sun = new Sphere(64, "assets\\2k_sun.jpg");
+	m_sun = new Sphere(64, "assets\\2k_sun.jpg", "assets\\sunNorm.png");
 
 	// The Earth
 	m_earth = new Sphere(48, "assets\\2k_earth_daymap.jpg");
@@ -436,6 +436,8 @@ void Graphics::Render()
 	glUniformMatrix4fv(m_projectionMatrix, 1, GL_FALSE, glm::value_ptr(m_camera->GetProjection()));
 	glUniformMatrix4fv(m_viewMatrix, 1, GL_FALSE, glm::value_ptr(m_camera->GetView()));
 
+
+
 	// Render the objects
 	/*if (m_cube != NULL){
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_cube->GetModel()));
@@ -444,6 +446,8 @@ void Graphics::Render()
 
 	if (m_mesh != NULL) {
 		glUniform1i(m_hasTexture, false);
+		//Create the invtranspose matrix for normal in shader
+		glUniformMatrix3fv(m_normalMatrix, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(m_camera->GetView() * m_sun->GetModel())))));
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_mesh->GetModel()));
 		if (m_mesh->hasTex) {
 			//glUniform1i(m_hasTexture, true);
@@ -466,18 +470,36 @@ void Graphics::Render()
 
 	if (m_sun != NULL) {
 		glUniform1i(m_hasTexture, false);
+		glUniform1i(hasN, false);
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_sun->GetModel()));
 		if (m_sun->hasTex) {
 			glUniform1i(m_hasTexture, true);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_sun->getTextureID());
-			GLuint sampler = m_shader->GetUniformLocation("sp");
+			glBindTexture(GL_TEXTURE_2D, m_sun->getTextureID(0));
+			GLuint sampler = m_shader->GetUniformLocation("samp");
 			if (sampler == INVALID_UNIFORM_LOCATION)
 			{
 				printf("Sampler Not found not found\n");
 			}
-			glUniform1i(sampler, 0);
-			m_sun->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+			if (m_sun->hasNorm)
+			{
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, m_sun->getTextureID(1));
+				GLuint nSampler = m_shader->GetUniformLocation("samp1");
+				if (nSampler == INVALID_UNIFORM_LOCATION)
+				{
+					printf("nSampler not found\n");
+				}
+				glUniform1i(sampler, 0);
+				glUniform1i(nSampler, 1);
+				m_sun->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture, hasN);
+			}
+			else
+			{
+				glUniform1i(sampler, 0);
+				m_sun->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+			}
+			
 		}
 	}
 	for (int i = 0; i < asteroidBelt.size(); i++) {
@@ -521,7 +543,7 @@ void Graphics::Render()
 		if (m_venus->hasTex) {
 			//glUniform1i(m_hasTexture, true);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_venus->getTextureID());
+			glBindTexture(GL_TEXTURE_2D, m_venus->getTextureID(0));
 			GLuint sampler = m_shader->GetUniformLocation("sp");
 			if (sampler == INVALID_UNIFORM_LOCATION)
 			{
@@ -537,7 +559,7 @@ void Graphics::Render()
 		if (m_mercury->hasTex) {
 			//glUniform1i(m_hasTexture, true);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_mercury->getTextureID());
+			glBindTexture(GL_TEXTURE_2D, m_mercury->getTextureID(0));
 			GLuint sampler = m_shader->GetUniformLocation("sp");
 			if (sampler == INVALID_UNIFORM_LOCATION)
 			{
@@ -553,7 +575,7 @@ void Graphics::Render()
 		if (m_earth->hasTex) {
 			glUniform1i(m_hasTexture, true);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_earth->getTextureID());
+			glBindTexture(GL_TEXTURE_2D, m_earth->getTextureID(0));
 			GLuint sampler = m_shader->GetUniformLocation("sp");
 			if (sampler == INVALID_UNIFORM_LOCATION)
 			{
@@ -569,7 +591,7 @@ void Graphics::Render()
 		if (m_mars->hasTex) {
 			//glUniform1i(m_hasTexture, true);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_mars->getTextureID());
+			glBindTexture(GL_TEXTURE_2D, m_mars->getTextureID(0));
 			GLuint sampler = m_shader->GetUniformLocation("sp");
 			if (sampler == INVALID_UNIFORM_LOCATION)
 			{
@@ -585,7 +607,7 @@ void Graphics::Render()
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_moon->GetModel()));
 		if (m_moon->hasTex) {
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_moon->getTextureID());
+			glBindTexture(GL_TEXTURE_2D, m_moon->getTextureID(0));
 			GLuint sampler = m_shader->GetUniformLocation("sp");
 			if (sampler == INVALID_UNIFORM_LOCATION)
 			{
@@ -601,7 +623,7 @@ void Graphics::Render()
 		if (m_jupiter->hasTex) {
 			//glUniform1i(m_hasTexture, true);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_jupiter->getTextureID());
+			glBindTexture(GL_TEXTURE_2D, m_jupiter->getTextureID(0));
 			GLuint sampler = m_shader->GetUniformLocation("sp");
 			if (sampler == INVALID_UNIFORM_LOCATION)
 			{
@@ -617,7 +639,7 @@ void Graphics::Render()
 		if (m_saturn->hasTex) {
 			//glUniform1i(m_hasTexture, true);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_saturn->getTextureID());
+			glBindTexture(GL_TEXTURE_2D, m_saturn->getTextureID(0));
 			GLuint sampler = m_shader->GetUniformLocation("sp");
 			if (sampler == INVALID_UNIFORM_LOCATION)
 			{
@@ -633,7 +655,7 @@ void Graphics::Render()
 		if (m_uranus->hasTex) {
 			//glUniform1i(m_hasTexture, true);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_uranus->getTextureID());
+			glBindTexture(GL_TEXTURE_2D, m_uranus->getTextureID(0));
 			GLuint sampler = m_shader->GetUniformLocation("sp");
 			if (sampler == INVALID_UNIFORM_LOCATION)
 			{
@@ -649,7 +671,7 @@ void Graphics::Render()
 		if (m_neptune->hasTex) {
 			//glUniform1i(m_hasTexture, true);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_neptune->getTextureID());
+			glBindTexture(GL_TEXTURE_2D, m_neptune->getTextureID(0));
 			GLuint sampler = m_shader->GetUniformLocation("sp");
 			if (sampler == INVALID_UNIFORM_LOCATION)
 			{
@@ -697,7 +719,13 @@ bool Graphics::collectShPrLocs() {
 		printf("m_modelMatrix not found\n");
 		anyProblem = false;
 	}
-
+	//Locate the normal matrix in the shader
+	m_normalMatrix = m_shader->GetUniformLocation("normMatrix");
+	if (m_normalMatrix == INVALID_UNIFORM_LOCATION)
+	{
+		printf("m_normMatrix not found\n");
+		anyProblem = false;
+	}
 	// Locate the position vertex attribute
 	m_positionAttrib = m_shader->GetAttribLocation("v_position");
 	if (m_positionAttrib == -1)
@@ -707,7 +735,7 @@ bool Graphics::collectShPrLocs() {
 	}
 
 	// Locate the color vertex attribute
-	m_colorAttrib = m_shader->GetAttribLocation("v_color");
+	m_colorAttrib = m_shader->GetAttribLocation("v_normal");
 	if (m_colorAttrib == -1)
 	{
 		printf("v_color attribute not found\n");
@@ -725,6 +753,92 @@ bool Graphics::collectShPrLocs() {
 	m_hasTexture = m_shader->GetUniformLocation("hasTexture");
 	if (m_hasTexture == INVALID_UNIFORM_LOCATION) {
 		printf("hasTexture uniform not found\n");
+		anyProblem = false;
+	}
+	//locate the global ambient attribute
+	globalAmbLoc = m_shader->GetAttribLocation("GlobalAmbient");
+	if (globalAmbLoc == -1)
+	{
+		printf("globalAmbient attribute not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the light ambient attribute
+	lightALoc = m_shader->GetAttribLocation("light.ambient");
+	if (lightALoc == -1)
+	{
+		printf("lightAmbient attribute not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the light diffuse attribute
+	lightDLoc = m_shader->GetAttribLocation("light.diffuse");
+	if (lightDLoc == -1)
+	{
+		printf("lightDiffuse attribute not found\n");
+		anyProblem = false;
+	}
+	//Locate light specular attribute
+	lightSLoc = m_shader->GetUniformLocation("light.spec");
+	if (lightSLoc == INVALID_UNIFORM_LOCATION) {
+		printf("lightSpec uniform not found\n");
+		anyProblem = false;
+	}	globalAmbLoc = m_shader->GetAttribLocation("GlobalAmbient");
+	if (globalAmbLoc == -1)
+	{
+		printf("globalAmbient attribute not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the light position attribute
+	lightPosLoc = m_shader->GetAttribLocation("light.position");
+	if (lightPosLoc == -1)
+	{
+		printf("lightPosition attribute not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the ambient material attribute
+	mAmbLoc = m_shader->GetAttribLocation("material.ambient");
+	if (mAmbLoc == -1)
+	{
+		printf("material Ambient attribute not found\n");
+		anyProblem = false;
+	}
+	//Locate Diff texture attribute
+	mDiffLoc = m_shader->GetUniformLocation("material.diffuse");
+	if (lightSLoc == INVALID_UNIFORM_LOCATION) {
+		printf("material Diffuse uniform not found\n");
+		anyProblem = false;
+	}	
+	
+	mNormLoc = m_shader->GetAttribLocation("material.normal");
+	if (mNormLoc == -1)
+	{
+		printf("material Normal attribute not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the color vertex attribute
+	mSpecLoc = m_shader->GetAttribLocation("material.spec");
+	if (mSpecLoc == -1)
+	{
+		printf("material Specular attribute not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the texture coord vertex attribute
+	mShineLoc = m_shader->GetAttribLocation("material.shininess");
+	if (mShineLoc == -1)
+	{
+		printf("mShineLoc attribute not found\n");
+		anyProblem = false;
+	}
+	//Locate hasN attribute
+	hasN = m_shader->GetAttribLocation("hasNormalMap");
+	if (hasN == -1)
+	{
+		printf("hasN attribute not found\n");
 		anyProblem = false;
 	}
 

@@ -1,6 +1,6 @@
 #include "object.h"
 #include "Texture.h"
-
+#include "graphics_headers.h"
 class Sphere :
     public Object
 {
@@ -16,7 +16,7 @@ public:
 
     Sphere(int prec);
     Sphere(int prec, const char* fname);
-
+    Sphere(int prec, const char* fname, const char* nname);
     int getNumVertices();
     int getNumIndices();
     std::vector<int> getIndices();
@@ -24,9 +24,15 @@ public:
     std::vector<glm::vec2> getTexCoords();
     std::vector<glm::vec3> getNormals();
 
-    GLuint getTextureID() { return m_texture->getTextureID(); }
+    GLuint getTextureID(int textureType) { 
+        if (textureType == 0)
+            return m_texture->getTextureID();
+        else
+            return m_Ntexture->getTextureID();
+    }
     
     bool hasTex;
+    bool hasNorm;
 
 private:
     glm::vec3 pivotLocation;
@@ -36,6 +42,7 @@ private:
     GLuint VB;
     GLuint IB;
     Texture* m_texture;
+    Texture* m_Ntexture;
 
 
     GLuint vao;

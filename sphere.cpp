@@ -31,7 +31,25 @@ Sphere::Sphere(int prec, const char* fname) { // prec is precision, or number of
     else
         hasTex = false;
 }
+Sphere::Sphere(int prec, const char* fname, const char* nname) { // prec is precision, or number of slices
 
+    init(prec);
+    setupVertices();
+    setupBuffers();
+    setupModelMatrix(glm::vec3(0., 0., 0.), 0., 1.);
+
+    // load texture from file
+    m_texture = new Texture(fname, false);
+    if (m_texture)
+        hasTex = true;
+    else
+        hasTex = false;
+    m_Ntexture = new Texture(nname, true);
+    if (m_Ntexture)
+        hasNorm = true;
+    else
+        hasNorm = false;
+}
 
 void Sphere::Render(GLint positionAttribLoc, GLint colorAttribLoc)
 {
@@ -79,6 +97,48 @@ void Sphere::Render(GLint posAttribLoc, GLint colAttribLoc, GLint tcAttribLoc, G
     }
     else
         glUniform1i(hasTextureLoc, false);
+
+
+    // Bind your Element Array
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IB);
+
+    // Render
+    glDrawElements(GL_TRIANGLES, Indices.size(), GL_UNSIGNED_INT, 0);
+
+    // Disable vertex arrays
+    glDisableVertexAttribArray(posAttribLoc);
+    glDisableVertexAttribArray(colAttribLoc);
+    glDisableVertexAttribArray(tcAttribLoc);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+void Sphere::Render(GLint posAttribLoc, GLint colAttribLoc, GLint tcAttribLoc, GLint hasTextureLoc, GLint hasNormalLoc)
+{
+    glBindVertexArray(vao);
+    // Enable vertex attibute arrays for each vertex attrib
+    glEnableVertexAttribArray(posAttribLoc);
+    glEnableVertexAttribArray(colAttribLoc);
+    glEnableVertexAttribArray(tcAttribLoc);
+
+    // Bind your VBO
+    glBindBuffer(GL_ARRAY_BUFFER, VB);
+
+
+    // Set vertex attribute pointers to the load correct data. Update here to load the correct attributes.
+    glVertexAttribPointer(posAttribLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+    glVertexAttribPointer(colAttribLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    glVertexAttribPointer(tcAttribLoc, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texcoord));
+    // If has texture, set up texture unit(s): update here for texture rendering
+    if (m_texture != NULL) {
+        glUniform1i(hasTextureLoc, true);
+    }
+    else
+        glUniform1i(hasTextureLoc, false);
+
+    if (m_Ntexture != NULL) {
+        glUniform1i(hasNormalLoc, true);
+    }
+    else
+        glUniform1i(hasNormalLoc, false);
 
 
     // Bind your Element Array
