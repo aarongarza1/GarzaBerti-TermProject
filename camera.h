@@ -13,6 +13,7 @@ public:
     glm::mat4 GetView();
     void UpdateView(glm::vec3 speed, glm::vec3 rot, float fov);
     glm::vec3 returnCamFront();
+    glm::vec3 getCameraPos() { return cameraPos; }
 private:
     float x = 0.0f;
     float y = 1.0f;

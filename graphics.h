@@ -40,6 +40,7 @@ class Graphics
 
     Camera *m_camera;
     Shader *m_shader;
+    Shader* m_shaderCubemap;
     int gameMode;
     GLint m_projectionMatrix;
     GLint m_viewMatrix;
@@ -48,7 +49,6 @@ class Graphics
     GLint m_colorAttrib;
     GLint m_tcAttrib;
     GLint m_hasTexture;
-    GLint m_isCubemap;
 
     Object* cubemap;
     Sphere* m_sun;
@@ -64,8 +64,12 @@ class Graphics
     Sphere* m_uranus;
     Sphere* m_venus;
     Mesh* m_mesh;
-    Sphere* m_skybox;
+    Cubemap* m_skybox;
     std::vector<Mesh*> asteroidBelt;
+    std::vector<Mesh*> asteroidBelt2;
+    std::vector<float> randomFloats1;
+    std::vector<float> randomFloats2;
+    std::vector<float> randomFloats3;
 
 
 };

@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+
 #include "graphics_headers.h"
 #include <SOIL2/SOIL2.h>
 
@@ -7,14 +9,17 @@ class Texture
 
 public:
 	Texture();
-	Texture(const char* fileName);
+	Texture(std::vector<const char*> faces);
+	Texture(const char* fileName, bool normal);
 	bool loadTexture(const char* texFile);
-	GLuint getTextureID() { return m_TextureID; }
+	bool loadNormalTexture(const char* texFile);
+	bool loadCubeTexture(std::vector<const char*> faces);
+	GLuint getTextureID() const { return m_TextureID; }
 
 private:
 	GLuint m_TextureID;
 
-	bool initializeTexture();
+	static bool initializeTexture();
 
 };
 

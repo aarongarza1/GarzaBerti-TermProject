@@ -51,7 +51,7 @@ Mesh::Mesh(glm::vec3 pivot, const char* fname, const char* tname)
 	}
 
 	// load texture from file
-	m_texture = new Texture(tname);
+	m_texture = new Texture(tname, false);
 	if (m_texture)
 		hasTex = true;
 	else

@@ -42,7 +42,7 @@ bool Graphics::Initialize(int width, int height)
 	}
 
 	// Set up the shaders
-	m_shader = new Shader();
+	m_shader = new Shader("assets\\shaderFiles\\vert.vs", "assets\\shaderFiles\\vert.frag");
 	if (!m_shader->Initialize())
 	{
 		printf("Shader Failed to Initialize\n");
@@ -67,6 +67,33 @@ bool Graphics::Initialize(int width, int height)
 	if (!m_shader->Finalize())
 	{
 		printf("Program to Finalize\n");
+		return false;
+	}
+	m_shaderCubemap = new Shader("assets\\shaderFiles\\skybox.vs", "assets\\shaderFiles\\skybox.frag");
+	if (!m_shaderCubemap->Initialize())
+	{
+		printf("Shader Failed to Initialize\n");
+		return false;
+	}
+
+	// Add the vertex shader
+	if (!m_shaderCubemap->AddShader(GL_VERTEX_SHADER))
+	{
+		printf("Vertex Shader failed to Initialize\n");
+		return false;
+	}
+
+	// Add the fragment shader
+	if (!m_shaderCubemap->AddShader(GL_FRAGMENT_SHADER))
+	{
+		printf("Fragment Shader failed to Initialize\n");
+		return false;
+	}
+
+	// Connect the program
+	if (!m_shaderCubemap->Finalize())
+	{
+		printf("cubeProgram to Finalize\n");
 		return false;
 	}
 
@@ -96,38 +123,56 @@ bool Graphics::Initialize(int width, int height)
 	m_saturn = new Sphere(48, "assets\\Saturn.jpg");
 	m_uranus = new Sphere(48, "assets\\Uranus.jpg");
 	m_venus = new Sphere(48, "assets\\Venus.jpg");
-	m_skybox = new Sphere(68, "assets\\spacetry3.jpg");
+	m_skybox = new Cubemap();
 	//m_skybox = new Cubemap(glm::vec3(0., 0., 0.), "assets\\17520.jpg");
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		Mesh* aster = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast1.obj", "assets\\ast1tex.png");
 		asteroidBelt.push_back(aster);
+		Mesh* aster2 = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast1.obj", "assets\\ast1tex.png");
+		asteroidBelt2.push_back(aster2);
 	}
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		Mesh* aster = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast2.obj", "assets\\ast2tex.png");
 		asteroidBelt.push_back(aster);
+		Mesh* aster2 = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast1.obj", "assets\\ast1tex.png");
+		asteroidBelt2.push_back(aster2);
 	}
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		Mesh* aster = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast3.obj", "assets\\ast3tex.png");
 		asteroidBelt.push_back(aster);
+		Mesh* aster2 = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast1.obj", "assets\\ast1tex.png");
+		asteroidBelt2.push_back(aster2);
 	}
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		Mesh* aster = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast4.obj", "assets\\ast4tex.png");
 		asteroidBelt.push_back(aster);
+		Mesh* aster2 = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\ast1.obj", "assets\\ast1tex.png");
+		asteroidBelt2.push_back(aster2);
 	}
-	glUniform1i(m_isCubemap, false);
+	for (int i = 0; i < asteroidBelt.size(); i++)
+	{
+		randomFloats1.push_back(((float(rand()) / float(RAND_MAX)) * (.07 - -.07)) + -.07);
+	}
+	for (int i = 0; i < asteroidBelt.size(); i++)
+	{
+		randomFloats2.push_back(((float(rand()) / float(RAND_MAX)) * (1 - -1)) + -1);
+	}
+	for (int i = 0; i < asteroidBelt.size(); i++)
+	{
+		randomFloats3.push_back(((float(rand()) / float(RAND_MAX)) * (.7 - -.7)) + -.7);
+	}
 	//enable depth testing
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-
 	return true;
 }
 
 void Graphics::HierarchicalUpdate2(double dt) {
-
+	m_skybox->Render(m_shaderCubemap, m_camera);
 	// Update your animation for the solar system here.
 	std::vector<float> speed, dist, rotSpeed, scale;
 	glm::vec3 rotVector;
@@ -173,23 +218,50 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	if (m_mercury != NULL)
 		m_mercury->Update(localTransform);
 	modelStack.pop();
+	std::vector<int> indices;
+	for (int i = 0; i < asteroidBelt.size(); i++)
+	{
+		indices.push_back(i);
+	}
+	
 	for(int i = 0; i < asteroidBelt.size(); i++){
+		
 		// position of the first planet
-		speed = { .2, .2, .2 };
-		dist = { -30., 3, -30. };
+		speed = { float(.2 + randomFloats1[i]), float(.2 + randomFloats1[i]), float(.2 + randomFloats1[i])};
+		dist = { float( - 30. + randomFloats2[i] * 2), 9, float(-30. + randomFloats2[i] * 2)};
 		rotVector = { 1.,1.,1. };
-		rotSpeed = { 1., 1., 1. };
-		scale = { .5,.5,.5 };
+		rotSpeed = { float(1.+ randomFloats3[i]), float(1. + randomFloats3[i]), float(1.)};
+		scale = { .25,.25,.25 };
 		localTransform = modelStack.top();				// start with sun's coordinate
 		localTransform *= glm::translate(glm::mat4(1.f),
 			glm::vec3((.73 * cos(speed[0] * dt)) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
 		modelStack.push(localTransform);			// store planet-sun coordinate
 		localTransform *= glm::rotate(glm::mat4(1.f), rotSpeed[0] * (float)dt, rotVector);
 		localTransform *= glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
-		if (asteroidBelt[i] != NULL)
-			asteroidBelt[i]->Update(localTransform);
+		if (asteroidBelt[indices[i]] != NULL)
+			asteroidBelt[indices[i]]->Update(localTransform);
 		modelStack.pop();
 	}
+
+	for (int i = 0; i < asteroidBelt2.size(); i++) {
+
+		// position of the first planet
+		speed = { float(.2 + randomFloats1[i]), float(.2 + randomFloats1[i]), float(.2 + randomFloats1[i]) };
+		dist = { float(-17. + randomFloats2[i] * 2), -6, float(-17. + randomFloats2[i] * 2) };
+		rotVector = { 1.,1.,1. };
+		rotSpeed = { float(1. + randomFloats3[i]), float(1. + randomFloats3[i]), float(1.) };
+		scale = { .25,.25,.25 };
+		localTransform = modelStack.top();				// start with sun's coordinate
+		localTransform *= glm::translate(glm::mat4(1.f),
+			glm::vec3((.73 * cos(speed[0] * dt)) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
+		modelStack.push(localTransform);			// store planet-sun coordinate
+		localTransform *= glm::rotate(glm::mat4(1.f), rotSpeed[0] * (float)dt, rotVector);
+		localTransform *= glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
+		if (asteroidBelt2[asteroidBelt2.size() - 1 - i] != NULL)
+			asteroidBelt2[asteroidBelt2.size() - 1 - i]->Update(localTransform);
+		modelStack.pop();
+	}
+
 	// position of the second planet
 	speed = { .26, .26, .26 };
 	dist = { 10., 0, 10. };
@@ -331,13 +403,14 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 
 	modelStack.pop();	// empy stack
-	modelStack.push(glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 0)));  // sun's coordinate
+
+	/*modelStack.push(glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 0)));  // sun's coordinate
 	localTransform = modelStack.top();		// The sun origin
 	//localTransform *= glm::rotate(glm::mat4(1.0f), (float)dt, glm::vec3(0.f, 1.f, 0.f));
 	localTransform *= glm::scale(glm::vec3(50., 50., 50.));
 	if (m_skybox != NULL)
 		m_skybox->Update(localTransform);
-	modelStack.pop();
+	modelStack.pop(); */
 }
 
 
@@ -355,7 +428,7 @@ void Graphics::Render()
 	//clear the screen
 	glClearColor(0.5, 0.2, 0.2, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	m_skybox->Render(m_shaderCubemap, m_camera);
 	// Start the correct program
 	m_shader->Enable();
 
@@ -424,22 +497,24 @@ void Graphics::Render()
 				asteroidBelt[i]->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 			}
 	}
-	if (m_skybox != NULL) {
+	for (int i = 0; i < asteroidBelt2.size(); i++) {
+		if (asteroidBelt2[i] != NULL) {}
 		glUniform1i(m_hasTexture, false);
-		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_skybox->GetModel()));
-		if (m_skybox->hasTex) {
+		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(asteroidBelt2[i]->GetModel()));
+		if (asteroidBelt2[i]->hasTex) {
 			glUniform1i(m_hasTexture, true);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_skybox->getTextureID());
+			glBindTexture(GL_TEXTURE_2D, asteroidBelt2[i]->getTextureID());
 			GLuint sampler = m_shader->GetUniformLocation("sp");
 			if (sampler == INVALID_UNIFORM_LOCATION)
 			{
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
-			m_skybox->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+			asteroidBelt2[i]->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
+	
 	if (m_venus != NULL) {
 		glUniform1i(m_hasTexture, false);
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_venus->GetModel()));
@@ -584,7 +659,9 @@ void Graphics::Render()
 			m_neptune->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
+	
 
+	
 	// Get any errors from OpenGL
 	auto error = glGetError();
 	if (error != GL_NO_ERROR)
@@ -648,12 +725,6 @@ bool Graphics::collectShPrLocs() {
 	m_hasTexture = m_shader->GetUniformLocation("hasTexture");
 	if (m_hasTexture == INVALID_UNIFORM_LOCATION) {
 		printf("hasTexture uniform not found\n");
-		anyProblem = false;
-	}
-	//Whether our item is a cubemap
-	m_isCubemap = m_shader->GetUniformLocation("isCubemap");
-	if (m_hasTexture == INVALID_UNIFORM_LOCATION) {
-		printf("isCubemap uniform not found\n");
 		anyProblem = false;
 	}
 

@@ -1,42 +1,78 @@
-#ifndef CUBEMAP_H
-#define CUBEMAP_H
+#pragma once
+
 #include <vector>
-#include "graphics_headers.h"
+#include "camera.h"
+#include "shader.h"
 #include "Texture.h"
-    class Cubemap
+
+class Cubemap
+{
+public:
+    Cubemap();
+    ~Cubemap();
+
+    void Render(Shader* shader, Camera* camera);
+    Texture* texture;
+
+private:
+    unsigned int CubemapVAO, CubemapVBO, CubemapEBO;
+
+    // Shader Variables
+    GLint m_projectionMatrix;
+    GLint m_viewMatrix;
+    GLint m_modelMatrix;
+    GLint m_positionAttrib;
+    GLint m_colorAttrib;
+    GLint m_tcAttrib;
+    GLint m_hasTexture;
+    GLint m_hasNormal;
+
+    // Skybox Vertices
+    float CubemapVertices[108] =
     {
-    public:
-        Cubemap();
-        Cubemap(glm::vec3 pivot);
-        Cubemap(glm::vec3 pivot, const char* fname);
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
 
-        ~Cubemap();
-        void Update(glm::mat4 model);
-        void Render(GLint posAttrib, GLint colAttrib, GLint tcAttribLoc, GLint hasTextureLoc);
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
 
-        glm::mat4 GetModel();
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
 
-        bool InitBuffers();
-        void setupVerticies();
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
 
+        -1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
 
-        GLuint getTextureID() { return m_texture->getTextureID(); }
-
-        bool hasTex;
-    private:
-        glm::vec3 pivotLocation;
-        glm::mat4 model;
-        std::vector<Vertex> Vertices;
-        std::vector<unsigned int> Indices;
-        GLuint VB;
-        GLuint IB;
-
-        GLuint vao;
-
-        float angle;
-
-        Texture* m_texture;
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f
     };
+};
 
-#endif
+
 
