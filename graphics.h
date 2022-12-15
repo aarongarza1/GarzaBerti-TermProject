@@ -27,7 +27,7 @@ class Graphics
     void Render();
 
     Camera* getCamera() { return m_camera; }
-
+    float toRadians(float degrees) { return (degrees * 2.0f * 3.14159f) / 360.0f; }
   private:
     std::string ErrorString(GLenum error);
 
@@ -60,7 +60,7 @@ class Graphics
 
     GLint mAmbLoc;
     GLint mDiffLoc;
-    GLint mNormLoc;
+    //GLint mNormLoc;
     GLint mSpecLoc;
     GLint mShineLoc;
 
@@ -88,6 +88,17 @@ class Graphics
     std::vector<float> randomFloats3;
 
 
+
+
+    //LIGHT SETTINGS
+    glm::vec3 initialLightLoc = glm::vec3(5.0f, 2.0f, 3.0f);
+    float lightPos[3];
+    glm::mat4 rMat;
+    // white light
+    float globalAmbient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float lightAmbient[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    float lightDiffuse[4] = { 0.9f, 0.8f, .8f, 1.0f };
+    float lightSpecular[4] = { 0.2f, 0.15f, 0.1f, 1.0f };
 };
 
 #endif /* GRAPHICS_H */

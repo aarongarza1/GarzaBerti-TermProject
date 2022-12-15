@@ -106,23 +106,23 @@ bool Graphics::Initialize(int width, int height)
 	m_mesh = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\SpaceShip-1.obj", "assets\\SpaceShip-1.png");
 
 	// The Sun
-	m_sun = new Sphere(64, "assets\\2k_sun.jpg", "assets\\sunNorm.png");
+	m_sun = new Sphere(64, "assets\\2k_sun.jpg", "assets\\sunNormal.png");
 
 	// The Earth
-	m_earth = new Sphere(48, "assets\\2k_earth_daymap.jpg");
+	m_earth = new Sphere(48, "assets\\2k_earth_daymap.jpg", "assets\\2k_earth_daymap-n.jpg");
 	
 	// The moon
-	m_moon = new Sphere(48, "assets\\2k_moon.jpg");
+	m_moon = new Sphere(48, "assets\\2k_moon.jpg", "assets\\2k_moon-n.jpg");
 
-	m_ceres = new Sphere(48, "assets\\Ceres.jpg");
-	m_eris = new Sphere(48, "assets\\Eris.jpg");
-	m_jupiter = new Sphere(48, "assets\\Jupiter.jpg");
-	m_mars = new Sphere(48, "assets\\Mars.jpg");
-	m_mercury = new Sphere(48, "assets\\Mercury.jpg");
-	m_neptune = new Sphere(48, "assets\\Neptune.jpg");
-	m_saturn = new Sphere(48, "assets\\Saturn.jpg");
-	m_uranus = new Sphere(48, "assets\\Uranus.jpg");
-	m_venus = new Sphere(48, "assets\\Venus.jpg");
+	m_ceres = new Sphere(48, "assets\\Ceres.jpg", "assets\\Ceres-n.jpg");
+	m_eris = new Sphere(48, "assets\\Eris.jpg", "assets\\Eris-n.jpg");
+	m_jupiter = new Sphere(48, "assets\\Jupiter.jpg", "assets\\Jupiter-n.jpg");
+	m_mars = new Sphere(48, "assets\\Mars.jpg", "assets\\Mars-n.jpg");
+	m_mercury = new Sphere(48, "assets\\Mercury.jpg", "assets\\Mercury-n.jpg");
+	m_neptune = new Sphere(48, "assets\\Neptune.jpg", "assets\\Neptune-n.jpg");
+	m_saturn = new Sphere(48, "assets\\Saturn.jpg", "assets\\Uranus-n.jpg");
+	m_uranus = new Sphere(48, "assets\\Uranus.jpg", "assets\\Uranus-n.jpg");
+	m_venus = new Sphere(48, "assets\\Venus.jpg", "assets\\Venus-n.jpg");
 	m_skybox = new Cubemap();
 	//m_skybox = new Cubemap(glm::vec3(0., 0., 0.), "assets\\17520.jpg");
 	for (int i = 0; i < 6; i++)
@@ -165,6 +165,11 @@ bool Graphics::Initialize(int width, int height)
 	{
 		randomFloats3.push_back(((float(rand()) / float(RAND_MAX)) * (.7 - -.7)) + -.7);
 	}
+	glProgramUniform4fv(m_shader->GetShaderProgram(), globalAmbLoc, 1, globalAmbient);
+	glProgramUniform4fv(m_shader->GetShaderProgram(), lightALoc, 1, lightAmbient);
+	glProgramUniform4fv(m_shader->GetShaderProgram(), lightDLoc, 1, lightDiffuse);
+	glProgramUniform4fv(m_shader->GetShaderProgram(), lightSLoc, 1, lightSpecular);
+	
 	//enable depth testing
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -428,16 +433,33 @@ void Graphics::Render()
 	//clear the screen
 	glClearColor(0.5, 0.2, 0.2, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	m_skybox->Render(m_shaderCubemap, m_camera);
 	// Start the correct program
 	m_shader->Enable();
-
+	glm::vec3 currentLightPos, transformed;
+	/*currentLightPos = glm::vec3(initialLightLoc.x, initialLightLoc.y, initialLightLoc.z);
+	float amt = 0.0f;
+	amt = glfwGetTime() * 25.0f;
+	rMat = glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 0.0f, 1.0f));
+	currentLightPos = glm::vec3(rMat * glm::vec4(currentLightPos, 1.0f));
+	transformed = glm::vec3(m_camera->GetView() * glm::vec4(currentLightPos, 1.0));
+	lightPos[0] = transformed.x;
+	lightPos[1] = transformed.y;
+	lightPos[2] = transformed.z;*/
+	lightPos[0] = 0.0;
+	lightPos[1] = 0.0;
+	lightPos[2] = 0.0;
+	glProgramUniform3fv(m_shader->GetShaderProgram(), lightPosLoc, 1, lightPos);
 	// Send in the projection and view to the shader (stay the same while camera intrinsic(perspective) and extrinsic (view) parameters are the same
 	glUniformMatrix4fv(m_projectionMatrix, 1, GL_FALSE, glm::value_ptr(m_camera->GetProjection()));
 	glUniformMatrix4fv(m_viewMatrix, 1, GL_FALSE, glm::value_ptr(m_camera->GetView()));
+	
 
-
-
+	glProgramUniform4fv(m_shader->GetShaderProgram(), mAmbLoc, 1, m_sun->matAmbient);
+	glProgramUniform4fv(m_shader->GetShaderProgram(), mDiffLoc, 1, m_sun->matDiff);
+	glProgramUniform4fv(m_shader->GetShaderProgram(), mSpecLoc, 1, m_sun->matSpec);
+	glProgramUniform1f(m_shader->GetShaderProgram(), mShineLoc, m_sun->matShininess);
 	// Render the objects
 	/*if (m_cube != NULL){
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_cube->GetModel()));
@@ -471,6 +493,7 @@ void Graphics::Render()
 	if (m_sun != NULL) {
 		glUniform1i(m_hasTexture, false);
 		glUniform1i(hasN, false);
+		glUniformMatrix3fv(m_normalMatrix, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(m_camera->GetView() * m_sun->GetModel())))));
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_sun->GetModel()));
 		if (m_sun->hasTex) {
 			glUniform1i(m_hasTexture, true);
@@ -505,6 +528,7 @@ void Graphics::Render()
 	for (int i = 0; i < asteroidBelt.size(); i++) {
 		if (asteroidBelt[i] != NULL){}
 			glUniform1i(m_hasTexture, false);
+			glUniformMatrix3fv(m_normalMatrix, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(m_camera->GetView() * m_sun->GetModel())))));
 			glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(asteroidBelt[i]->GetModel()));
 			if (asteroidBelt[i]->hasTex) {
 				glUniform1i(m_hasTexture, true);
@@ -522,6 +546,7 @@ void Graphics::Render()
 	for (int i = 0; i < asteroidBelt2.size(); i++) {
 		if (asteroidBelt2[i] != NULL) {}
 		glUniform1i(m_hasTexture, false);
+		glUniformMatrix3fv(m_normalMatrix, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(m_camera->GetView() * m_sun->GetModel())))));
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(asteroidBelt2[i]->GetModel()));
 		if (asteroidBelt2[i]->hasTex) {
 			glUniform1i(m_hasTexture, true);
@@ -539,6 +564,7 @@ void Graphics::Render()
 	
 	if (m_venus != NULL) {
 		glUniform1i(m_hasTexture, false);
+		glUniformMatrix3fv(m_normalMatrix, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(m_camera->GetView() * m_venus->GetModel())))));
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_venus->GetModel()));
 		if (m_venus->hasTex) {
 			//glUniform1i(m_hasTexture, true);
@@ -549,12 +575,29 @@ void Graphics::Render()
 			{
 				printf("Sampler Not found not found\n");
 			}
-			glUniform1i(sampler, 0);
-			m_venus->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+			if (m_venus->hasNorm)
+			{
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, m_venus->getTextureID(1));
+				GLuint nSampler = m_shader->GetUniformLocation("samp1");
+				if (nSampler == INVALID_UNIFORM_LOCATION)
+				{
+					printf("nSampler not found\n");
+				}
+				glUniform1i(sampler, 0);
+				glUniform1i(nSampler, 1);
+				m_venus->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture, hasN);
+			}
+			else
+			{
+				glUniform1i(sampler, 0);
+				m_venus->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+			}
 		}
 	}
 	if (m_mercury != NULL) {
 		glUniform1i(m_hasTexture, false);
+		glUniformMatrix3fv(m_normalMatrix, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(m_camera->GetView()* m_mercury->GetModel())))));
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_mercury->GetModel()));
 		if (m_mercury->hasTex) {
 			//glUniform1i(m_hasTexture, true);
@@ -565,12 +608,29 @@ void Graphics::Render()
 			{
 				printf("Sampler Not found not found\n");
 			}
-			glUniform1i(sampler, 0);
-			m_mercury->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+			if (m_mercury->hasNorm)
+			{
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, m_mercury->getTextureID(1));
+				GLuint nSampler = m_shader->GetUniformLocation("samp1");
+				if (nSampler == INVALID_UNIFORM_LOCATION)
+				{
+					printf("nSampler not found\n");
+				}
+				glUniform1i(sampler, 0);
+				glUniform1i(nSampler, 1);
+				m_mercury->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture, hasN);
+			}
+			else
+			{
+				glUniform1i(sampler, 0);
+				m_mercury->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+			}
 		}
 	}
 	if (m_earth != NULL) {
 		glUniform1i(m_hasTexture, false);
+		glUniformMatrix3fv(m_normalMatrix, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(m_camera->GetView()* m_sun->GetModel())))));
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_earth->GetModel()));
 		if (m_earth->hasTex) {
 			glUniform1i(m_hasTexture, true);
@@ -756,7 +816,7 @@ bool Graphics::collectShPrLocs() {
 		anyProblem = false;
 	}
 	//locate the global ambient attribute
-	globalAmbLoc = m_shader->GetAttribLocation("GlobalAmbient");
+	globalAmbLoc = m_shader->GetUniformLocation("GlobalAmbient");
 	if (globalAmbLoc == -1)
 	{
 		printf("globalAmbient attribute not found\n");
@@ -764,7 +824,7 @@ bool Graphics::collectShPrLocs() {
 	}
 
 	// Locate the light ambient attribute
-	lightALoc = m_shader->GetAttribLocation("light.ambient");
+	lightALoc = m_shader->GetUniformLocation("light.ambient");
 	if (lightALoc == -1)
 	{
 		printf("lightAmbient attribute not found\n");
@@ -772,7 +832,7 @@ bool Graphics::collectShPrLocs() {
 	}
 
 	// Locate the light diffuse attribute
-	lightDLoc = m_shader->GetAttribLocation("light.diffuse");
+	lightDLoc = m_shader->GetUniformLocation("light.diffuse");
 	if (lightDLoc == -1)
 	{
 		printf("lightDiffuse attribute not found\n");
@@ -783,15 +843,10 @@ bool Graphics::collectShPrLocs() {
 	if (lightSLoc == INVALID_UNIFORM_LOCATION) {
 		printf("lightSpec uniform not found\n");
 		anyProblem = false;
-	}	globalAmbLoc = m_shader->GetAttribLocation("GlobalAmbient");
-	if (globalAmbLoc == -1)
-	{
-		printf("globalAmbient attribute not found\n");
-		anyProblem = false;
-	}
+	}	
 
 	// Locate the light position attribute
-	lightPosLoc = m_shader->GetAttribLocation("light.position");
+	lightPosLoc = m_shader->GetUniformLocation("light.position");
 	if (lightPosLoc == -1)
 	{
 		printf("lightPosition attribute not found\n");
@@ -799,7 +854,7 @@ bool Graphics::collectShPrLocs() {
 	}
 
 	// Locate the ambient material attribute
-	mAmbLoc = m_shader->GetAttribLocation("material.ambient");
+	mAmbLoc = m_shader->GetUniformLocation("material.ambient");
 	if (mAmbLoc == -1)
 	{
 		printf("material Ambient attribute not found\n");
@@ -810,17 +865,10 @@ bool Graphics::collectShPrLocs() {
 	if (lightSLoc == INVALID_UNIFORM_LOCATION) {
 		printf("material Diffuse uniform not found\n");
 		anyProblem = false;
-	}	
-	
-	mNormLoc = m_shader->GetAttribLocation("material.normal");
-	if (mNormLoc == -1)
-	{
-		printf("material Normal attribute not found\n");
-		anyProblem = false;
 	}
 
 	// Locate the color vertex attribute
-	mSpecLoc = m_shader->GetAttribLocation("material.spec");
+	mSpecLoc = m_shader->GetUniformLocation("material.spec");
 	if (mSpecLoc == -1)
 	{
 		printf("material Specular attribute not found\n");
@@ -828,14 +876,14 @@ bool Graphics::collectShPrLocs() {
 	}
 
 	// Locate the texture coord vertex attribute
-	mShineLoc = m_shader->GetAttribLocation("material.shininess");
+	mShineLoc = m_shader->GetUniformLocation("material.shininess");
 	if (mShineLoc == -1)
 	{
 		printf("mShineLoc attribute not found\n");
 		anyProblem = false;
 	}
 	//Locate hasN attribute
-	hasN = m_shader->GetAttribLocation("hasNormalMap");
+	hasN = m_shader->GetUniformLocation("hasNormalMap");
 	if (hasN == -1)
 	{
 		printf("hasN attribute not found\n");
@@ -876,4 +924,6 @@ std::string Graphics::ErrorString(GLenum error)
 		return "None";
 	}
 }
+
+
 

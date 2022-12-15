@@ -2,7 +2,7 @@
 
 struct PositionalLight{
 	vec4 ambient;
-	vec4 diffues;
+	vec4 diffuse;
 	vec4 spec;
 	vec3 position;
 };
@@ -11,8 +11,7 @@ uniform PositionalLight light;
 
 struct Material{
 	vec4 ambient;
-	sampler2D diffuse;
-	sampler2D normal;
+	vec4 diffuse;
 	vec4 spec;
 	float shininess;
 }; 

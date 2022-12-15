@@ -10,6 +10,7 @@ public:
 
     void Render(GLint positionAttribLoc, GLint colorAttribLoc);
     void Render(GLint positionAttribLoc, GLint colorAttribLoc, GLint tcAttribLoc, GLint hasTex);
+    void Render(GLint posAttribLoc, GLint colAttribLoc, GLint tcAttribLoc, GLint hasTextureLoc, GLint hasNormalLoc);
 
     glm::mat4 GetModel() { return model; }
     void Update(glm::mat4 matModel);
@@ -33,6 +34,10 @@ public:
     
     bool hasTex;
     bool hasNorm;
+    float matAmbient[4] = { 0.2, 0.2, 0.2, 1.0 };
+    float matDiff[4] = { 1.0, 1., 1., 1.0 };
+    float matSpec[4] = { .8, .8, .8, 1.0 };
+    float matShininess = 5.0;
 
 private:
     glm::vec3 pivotLocation;
@@ -65,7 +70,7 @@ private:
     std::vector<float> pvalues; // vertex positions
     std::vector<float> tvalues; // texture coordinates
     std::vector<float> nvalues; // normal vectors
-
+    
  
 
 };
