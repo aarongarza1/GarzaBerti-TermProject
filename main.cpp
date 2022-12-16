@@ -12,26 +12,14 @@ int main(int argc, char **argv)
   
   while (x != 0)
   {
-      std::cout << "What mode would you like?\n0. Exit\n1. Planetary Observation\n2. Exploration Mode" << std::endl;
+      std::cout << "Would you like to play?\n0. Exit\n1. Play\n" << std::endl;
       std::cin >> x;
       switch (x)
       {
       case 0:
           break;
       case 1:
-          if (!engine->Initialize(x))
-          {
-              printf("The engine failed to start.\n");
-              delete engine;
-              engine = NULL;
-              return 1;
-          }
-          engine->Run();
-          delete engine;
-          engine = NULL;
-          break;
-      case 2:
-          if (!engine->Initialize(x))
+          if (!engine->Initialize())
           {
               printf("The engine failed to start.\n");
               delete engine;

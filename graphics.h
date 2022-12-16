@@ -20,28 +20,32 @@ using namespace std;
 class Graphics
 {
   public:
-    Graphics(int x);
+    Graphics();
     ~Graphics();
     bool Initialize(int width, int height);
     void HierarchicalUpdate2(double dt);
     void Render();
-
+    void findClosestPlanet();
+    void setGameMode(bool gameMod) { gameMode = gameMod; }
+    void initializeGameMode();
     Camera* getCamera() { return m_camera; }
     float toRadians(float degrees) { return (degrees * 2.0f * 3.14159f) / 360.0f; }
+    int getPlanetPort() { return planetPort;  }
+    glm::vec3 getClosestPlanet();
   private:
     std::string ErrorString(GLenum error);
-
+    int planetPort;
     bool collectShPrLocs();
     void ComputeTransforms (double dt, std::vector<float> speed, std::vector<float> dist,
         std::vector<float> rotSpeed, glm::vec3 rotVector, std::vector<float> scale, 
         glm::mat4& tmat, glm::mat4& rmat, glm::mat4& smat);
-
+    //glm::vec3 position = matrix[3];
+    glm::vec3 planetPos[9];
     stack<glm::mat4> modelStack;
-
+    bool gameMode;
     Camera *m_camera;
     Shader *m_shader;
     Shader* m_shaderCubemap;
-    int gameMode;
     GLint m_projectionMatrix;
     GLint m_viewMatrix;
     GLint m_modelMatrix;

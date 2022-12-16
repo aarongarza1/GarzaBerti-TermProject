@@ -32,7 +32,7 @@ bool Camera::Initialize(int w, int h)
 
 void Camera::UpdateView(glm::vec3 speed, glm::vec3 rot, float fov)
 {
-
+    cameraPos = speed;
     view = glm::lookAt(speed, //Eye Position
         rot + speed, //Focus point
         glm::vec3(0.0, 1.0, 0.0)); //Positive Y is up

@@ -20,7 +20,7 @@ Engine::~Engine()
   m_graphics = NULL;
 }
 
-bool Engine::Initialize(int x)
+bool Engine::Initialize()
 {
   // Start a window
   m_window = new Window(m_WINDOW_NAME, &m_WINDOW_WIDTH, &m_WINDOW_HEIGHT);
@@ -31,7 +31,7 @@ bool Engine::Initialize(int x)
   }
 
   // Start the graphics
-  m_graphics = new Graphics(x);
+  m_graphics = new Graphics();
   if(!m_graphics->Initialize(m_WINDOW_WIDTH, m_WINDOW_HEIGHT))
   {
     printf("The graphics failed to initialize.\n");
@@ -63,30 +63,42 @@ void Engine::Run()
 void Engine::ProcessInput()
 {
     m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(m_window->getWindow(), true);
-    float cameraSpeed = 0.1;//static_cast<float>(2.5 * deltaTime);
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS)
+    if (!gameMode)
     {
-        cameraPos += cameraSpeed * cameraFront;
-        m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(m_window->getWindow(), true);
+        float cameraSpeed = 0.1;//static_cast<float>(2.5 * deltaTime);
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS)
+        {
+            cameraPos += cameraSpeed * cameraFront;
+            m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
+        }
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS)
+        {
+            cameraPos -= cameraSpeed * cameraFront;
+            m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
+        }
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_A) == GLFW_PRESS)
+        {
+            cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+            m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
+        }
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS)
+        {
+            cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+            m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
+        }
     }
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS)
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_E) == GLFW_PRESS)
     {
-        cameraPos -= cameraSpeed * cameraFront;
-        m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
+        gameMode = -gameMode;
+        m_graphics->setGameMode(gameMode);
+        if (gameMode)
+            fov == 45;
+        m_graphics->findClosestPlanet();
+        firstCameraPos = m_graphics->getClosestPlanet();
+        m_graphics->getCamera()->UpdateView(firstCameraPos + glm::vec3(0.0f, 0.0f, 1.0f), cameraFront, fov);
     }
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_A) == GLFW_PRESS)
-    {
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-        m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
-    }
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS)
-    {
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-        m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
-    }
-
 
 
 

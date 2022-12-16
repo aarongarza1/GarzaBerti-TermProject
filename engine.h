@@ -29,14 +29,14 @@ class Engine
     Engine(const char*  name, int width, int height);
     
     ~Engine();
-    bool Initialize(int x);
+    bool Initialize();
     void Run();
     void ProcessInput();
     unsigned int getDT();
     long long GetCurrentTimeMillis();
     void Display(GLFWwindow*, double);
     static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
-
+    
   
   private:
     // Window related variables
@@ -45,8 +45,8 @@ class Engine
     int m_WINDOW_WIDTH;
     int m_WINDOW_HEIGHT;
     bool m_FULLSCREEN;
-
-
+    bool gameMode = 0;
+    glm::vec3 firstCameraPos;
     Graphics *m_graphics;
 
     bool m_running;

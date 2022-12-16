@@ -1,8 +1,7 @@
 #include "graphics.h"
 
-Graphics::Graphics(int x)
+Graphics::Graphics()
 {
-	gameMode = x;
 }
 
 Graphics::~Graphics()
@@ -189,7 +188,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	localTransform *= glm::scale(glm::vec3(1., 1., 1.));
 	if (m_sun != NULL)
 		m_sun->Update(localTransform);
-
+	planetPos[0] = localTransform[3];
 	//position of the spaceship
 	speed = { 0, -1, -1 };
 	dist = { 0., 1.5, 1.5 };
@@ -223,6 +222,9 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	if (m_mercury != NULL)
 		m_mercury->Update(localTransform);
 	modelStack.pop();
+
+	planetPos[1] = localTransform[3];
+
 	std::vector<int> indices;
 	for (int i = 0; i < asteroidBelt.size(); i++)
 	{
@@ -283,6 +285,8 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_venus->Update(localTransform);
 	modelStack.pop();
 
+	planetPos[2] = localTransform[3];
+
 	// position of the third planet
 	speed = { .22, .22, .22 };
 	dist = { 14., 0, 14. };
@@ -298,6 +302,8 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	if (m_earth != NULL)
 		m_earth->Update(localTransform);
 	
+	planetPos[3] = localTransform[3];
+
 	// position of the first moon
 	speed = { -.5, -.5, -.5 };
 	dist = { 1.0, 1.0, 1. };
@@ -318,13 +324,6 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	modelStack.pop(); 	// back to the planet coordinate
 
 	modelStack.pop(); 	// back to the sun coordinate
-	modelStack.pop();
-
-	// position of the sun	
-	modelStack.push(glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 0)));  // sun's coordinate
-	localTransform = modelStack.top();		// The sun origin
-	localTransform *= glm::rotate(glm::mat4(1.0f), (float)(dt*1.65), glm::vec3(0.f, 1.f, 0.f));
-	localTransform *= glm::scale(glm::vec3(1., 1., 1.));
 
 	// position of the fourth planet
 	speed = { .18, .18, .18 };
@@ -342,6 +341,8 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_mars->Update(localTransform);
 	modelStack.pop();
 
+	planetPos[4] = localTransform[3];
+
 	// position of the fifth planet
 	speed = { .13, .13, .13 };
 	dist = { 20., 0, -20. };
@@ -357,6 +358,8 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	if (m_jupiter != NULL)
 		m_jupiter->Update(localTransform);
 	modelStack.pop();
+
+	planetPos[5] = localTransform[3];
 
 	// position of the sixth planet
 	speed = { .10, .10, .10 };
@@ -374,6 +377,8 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_saturn->Update(localTransform);
 	modelStack.pop();
 
+	planetPos[6] = localTransform[3];
+
 	// position of the seventh planet
 	speed = { .06, .06, .06 };
 	dist = { 27., 0, 27. };
@@ -389,6 +394,8 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	if (m_uranus != NULL)
 		m_uranus->Update(localTransform);
 	modelStack.pop();
+
+	planetPos[7] = localTransform[3];
 
 	// position of the eighth planet
 	speed = { .02, .02, .02 };
@@ -406,6 +413,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_neptune->Update(localTransform);
 	modelStack.pop();
 
+	planetPos[8] = localTransform[3];
 
 	modelStack.pop();	// empy stack
 
@@ -427,7 +435,28 @@ void Graphics::ComputeTransforms(double dt, std::vector<float> speed, std::vecto
 	rmat = glm::rotate(glm::mat4(1.f), rotSpeed[0] * (float)dt, rotVector);
 	smat = glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
 }
+void Graphics::findClosestPlanet()
+{
+	glm::vec3 minDist = { 1000.f, 1000.f, 1000.f };
+	glm::vec3 currentPlayerLoc = m_camera->getCameraPos();
+	
+	for (int i = 0; i < 9; i++)
+	{
+		glm::vec3 distance = planetPos[i] - currentPlayerLoc;
+		
+		if (glm::length(distance) < glm::length(minDist))
+		{
+			minDist = distance;
+			planetPort = i;
+		}
+	}
 
+
+}
+glm::vec3 Graphics::getClosestPlanet()
+{
+	return planetPos[planetPort];
+}
 void Graphics::Render()
 {
 	//clear the screen
@@ -465,23 +494,25 @@ void Graphics::Render()
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_cube->GetModel()));
 		m_cube->Render(m_positionAttrib,m_colorAttrib);
 	}*/
-
-	if (m_mesh != NULL) {
-		glUniform1i(m_hasTexture, false);
-		//Create the invtranspose matrix for normal in shader
-		glUniformMatrix3fv(m_normalMatrix, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(m_camera->GetView() * m_sun->GetModel())))));
-		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_mesh->GetModel()));
-		if (m_mesh->hasTex) {
-			//glUniform1i(m_hasTexture, true);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_mesh->getTextureID());
-			GLuint sampler = m_shader->GetUniformLocation("sp");
-			if (sampler == INVALID_UNIFORM_LOCATION)
-			{
-				printf("Sampler Not found not found\n");
+	if (!gameMode)
+	{
+		if (m_mesh != NULL) {
+			glUniform1i(m_hasTexture, false);
+			//Create the invtranspose matrix for normal in shader
+			glUniformMatrix3fv(m_normalMatrix, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(m_camera->GetView() * m_sun->GetModel())))));
+			glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_mesh->GetModel()));
+			if (m_mesh->hasTex) {
+				//glUniform1i(m_hasTexture, true);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, m_mesh->getTextureID());
+				GLuint sampler = m_shader->GetUniformLocation("sp");
+				if (sampler == INVALID_UNIFORM_LOCATION)
+				{
+					printf("Sampler Not found not found\n");
+				}
+				glUniform1i(sampler, 0);
+				m_mesh->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 			}
-			glUniform1i(sampler, 0);
-			m_mesh->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
 
