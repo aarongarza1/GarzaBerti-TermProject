@@ -100,7 +100,7 @@ class Graphics
     glm::mat4 rMat;
     // white light
     float globalAmbient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-    float lightAmbient[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    float lightAmbient[4] = { 0.15f, 0.1f, 0.1f, 1.0f };
     float lightDiffuse[4] = { 0.9f, 0.8f, .8f, 1.0f };
     float lightSpecular[4] = { 0.2f, 0.15f, 0.1f, 1.0f };
 };
