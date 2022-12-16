@@ -37,7 +37,7 @@ public:
     float matAmbient[4] = { 0.2, 0.2, 0.2, 1.0 };
     float matDiff[4] = { 1.0, 1., 1., 1.0 };
     float matSpec[4] = { .8, .8, .8, 1.0 };
-    float matShininess = 5.0;
+    float matShininess = 10.0;
 
 private:
     glm::vec3 pivotLocation;
