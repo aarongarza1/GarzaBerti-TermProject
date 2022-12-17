@@ -23,8 +23,16 @@ public:
     bool loadModelFromFile(const char* path);
 
     bool hasTex;
+    bool hasNorm;
     GLuint getTextureID() { return m_texture->getTextureID(); }
-
+    float matAmbient[4] = { 0.2, 0.2, 0.2, 1.0 };
+    float matDiff[4] = { 1.0, 1., 1., 1.0 };
+    float matSpec[4] = { .8, .8, .8, 1.0 };
+    float matShininess = 10.0;
+    void setShininess(float x) { matShininess = x; }
+    void setAmbient(float x, float y, float z) { matAmbient[0] = x; matAmbient[1] = y; matAmbient[2] = z; }
+    void setDiff(float x, float y, float z) { matDiff[0] = x; matAmbient[1] = y; matAmbient[2] = z; }
+    void setSpec(float x, float y, float z) { matSpec[0] = x; matSpec[1] = y; matSpec[2] = z; }
 
 
 private:

@@ -25,7 +25,7 @@ class Graphics
     bool Initialize(int width, int height);
     void HierarchicalUpdate2(double dt);
     void Render();
-    void findClosestPlanet();
+    void findClosestPlanet(glm::vec3 currentLoc);
     void setGameMode(bool gameMod) { gameMode = gameMod; }
     void initializeGameMode();
     Camera* getCamera() { return m_camera; }
@@ -84,6 +84,7 @@ class Graphics
     Sphere* m_uranus;
     Sphere* m_venus;
     Mesh* m_mesh;
+    Mesh* m_halley;
     Cubemap* m_skybox;
     std::vector<Mesh*> asteroidBelt;
     std::vector<Mesh*> asteroidBelt2;

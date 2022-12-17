@@ -12,7 +12,7 @@ int main(int argc, char **argv)
   
   while (x != 0)
   {
-      std::cout << "Would you like to play?\n0. Exit\n1. Play\n" << std::endl;
+      std::cout << "Would you like to play?\n0. Exit\n1. Play" << std::endl;
       std::cin >> x;
       switch (x)
       {

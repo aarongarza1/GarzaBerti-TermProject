@@ -103,10 +103,18 @@ bool Graphics::Initialize(int width, int height)
 
 	// Starship
 	m_mesh = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\SpaceShip-1.obj", "assets\\SpaceShip-1.png");
-
+	//halley's comet
+	m_halley = new Mesh(glm::vec3(0.0, 0.0, 0.0), "assets\\Asteroid_o.obj", "assets\\Quartz_003_basecolor.jpg");
+	m_halley->setShininess(25.0);
+	m_halley->setAmbient(0.3, 0.0, 1.0);
+	m_halley->setDiff(0.3, 0.0, 1.0);
+	m_halley->setSpec(0.3, 0.0, 1.0);
 	// The Sun
 	m_sun = new Sphere(64, "assets\\2k_sun.jpg", "assets\\sunNormal.png");
-
+	m_sun->setShininess(20.0);
+	m_sun->setAmbient(1.0, 1.0, 0.0);
+	m_sun->setDiff(0.8, 0.8, 0.0);
+	m_sun->setSpec(1.0, 0.9, 0.0);
 	// The Earth
 	m_earth = new Sphere(48, "assets\\2k_earth_daymap.jpg", "assets\\2k_earth_daymap-n.jpg");
 	
@@ -207,12 +215,33 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 
 	modelStack.pop();
+
+
+
+	//position of Halley's Comet
+	speed = { .5, 0, .5 };
+	dist = { 25., 0., 25. };
+	rotVector = { 0.,1.,0. };
+	rotSpeed = { 1., 1., 1. };
+	scale = { .001f, .001f, .001f };
+	localTransform = modelStack.top();				// start with sun's coordinate
+	localTransform *= glm::translate(glm::mat4(1.f),
+		glm::vec3((.23 * cos(speed[0] * dt)) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2] + 20));
+	modelStack.push(localTransform);			// store planet-sun coordinate
+	localTransform *= glm::rotate(glm::mat4(1.f), rotSpeed[0] * (float)dt, rotVector);
+	localTransform *= glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
+
+	if (m_halley != NULL)
+		m_halley->Update(localTransform);
+	modelStack.pop();
+
+
 		// position of the first planet
 	speed = { .3, .3, .3 };
 	dist = { -6., 0, -6. };
 	rotVector = { 0.,1.,0. };
 	rotSpeed = { 1., 1., 1. };
-	scale = { .5,.5,.5 };
+	scale = { .25,.25,.25 };
 	localTransform = modelStack.top();				// start with sun's coordinate
 	localTransform *= glm::translate(glm::mat4(1.f),
 		glm::vec3((.73 * cos(speed[0] * dt)) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
@@ -235,10 +264,10 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		
 		// position of the first planet
 		speed = { float(.2 + randomFloats1[i]), float(.2 + randomFloats1[i]), float(.2 + randomFloats1[i])};
-		dist = { float( - 30. + randomFloats2[i] * 2), 9, float(-30. + randomFloats2[i] * 2)};
+		dist = { float( - 43. + randomFloats2[i] * 2), 9, float(-43. + randomFloats2[i] * 2)};
 		rotVector = { 1.,1.,1. };
 		rotSpeed = { float(1.+ randomFloats3[i]), float(1. + randomFloats3[i]), float(1.)};
-		scale = { .25,.25,.25 };
+		scale = { .17,.17,.17 };
 		localTransform = modelStack.top();				// start with sun's coordinate
 		localTransform *= glm::translate(glm::mat4(1.f),
 			glm::vec3((.73 * cos(speed[0] * dt)) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
@@ -254,10 +283,10 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 		// position of the first planet
 		speed = { float(.2 + randomFloats1[i]), float(.2 + randomFloats1[i]), float(.2 + randomFloats1[i]) };
-		dist = { float(-17. + randomFloats2[i] * 2), -6, float(-17. + randomFloats2[i] * 2) };
+		dist = { float(-29. + randomFloats2[i] * 2), -6, float(-29. + randomFloats2[i] * 2) };
 		rotVector = { 1.,1.,1. };
 		rotSpeed = { float(1. + randomFloats3[i]), float(1. + randomFloats3[i]), float(1.) };
-		scale = { .25,.25,.25 };
+		scale = { .1,.1,.1 };
 		localTransform = modelStack.top();				// start with sun's coordinate
 		localTransform *= glm::translate(glm::mat4(1.f),
 			glm::vec3((.73 * cos(speed[0] * dt)) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
@@ -271,10 +300,10 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 	// position of the second planet
 	speed = { .26, .26, .26 };
-	dist = { 10., 0, 10. };
+	dist = { 11., 0, 11. };
 	rotVector = { 0.,1.,0. };
 	rotSpeed = { -1., -1., -1. };
-	scale = { .5,.5,.5 };
+	scale = { .29,.29,.29 };
 	localTransform = modelStack.top();				// start with sun's coordinate
 	localTransform *= glm::translate(glm::mat4(1.f),
 		glm::vec3(.73*cos(speed[0] * dt) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
@@ -289,10 +318,10 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 	// position of the third planet
 	speed = { .22, .22, .22 };
-	dist = { 14., 0, 14. };
+	dist = { 16., 0, 16. };
 	rotVector = { 0.,1.,0. };
 	rotSpeed = { 1., 1., 1. };
-	scale = { .5,.5,.5 };
+	scale = { .31,.31,.31 };
 	localTransform = modelStack.top();				// start with sun's coordinate
 	localTransform *= glm::translate(glm::mat4(1.f),
 		glm::vec3(.89 * cos(speed[0] * dt) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
@@ -306,7 +335,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 	// position of the first moon
 	speed = { -.5, -.5, -.5 };
-	dist = { 1.0, 1.0, 1. };
+	dist = { .5, .5, .5 };
 	rotVector = { 0.,0.,-1. };
 	rotSpeed = { 1, .25, -2.5 };
 	scale = { .1f, .1f, .1f };
@@ -330,7 +359,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	dist = { -16., 0, -16. };
 	rotVector = { 0.,1.,0. };
 	rotSpeed = { 1., 1., 1. };
-	scale = { .5,.5,.5 };
+	scale = { .27,.27,.27 };
 	localTransform = modelStack.top();				// start with sun's coordinate
 	localTransform *= glm::translate(glm::mat4(1.f),
 		glm::vec3(.66 * cos(speed[0] * dt) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
@@ -345,10 +374,10 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 	// position of the fifth planet
 	speed = { .13, .13, .13 };
-	dist = { 20., 0, -20. };
+	dist = { 23., 0, -23. };
 	rotVector = { 0.,1.,0. };
 	rotSpeed = { 1., 1., 1. };
-	scale = { .5,.5,.5 };
+	scale = { .55,.55,.55 };
 	localTransform = modelStack.top();				// start with sun's coordinate
 	localTransform *= glm::translate(glm::mat4(1.f),
 		glm::vec3(-.73 * cos(speed[0] * dt) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
@@ -363,7 +392,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 	// position of the sixth planet
 	speed = { .10, .10, .10 };
-	dist = { 23., 0, 23. };
+	dist = { 29., 0, 29. };
 	rotVector = { 0.,1.,0. };
 	rotSpeed = { -1., -1., -1. };
 	scale = { .5,.5,.5 };
@@ -381,10 +410,10 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 	// position of the seventh planet
 	speed = { .06, .06, .06 };
-	dist = { 27., 0, 27. };
+	dist = { 36., 0, 36. };
 	rotVector = { 0.,1.,0. };
 	rotSpeed = { -1., -1., -1. };
-	scale = { .5,.5,.5 };
+	scale = { .47,.47,.47 };
 	localTransform = modelStack.top();				// start with sun's coordinate
 	localTransform *= glm::translate(glm::mat4(1.f),
 		glm::vec3(.69 * cos(speed[0] * dt) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
@@ -399,10 +428,10 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 	// position of the eighth planet
 	speed = { .02, .02, .02 };
-	dist = { 31., 0, 31. };
+	dist = { 41., 0, 41. };
 	rotVector = { 0.,1.,0. };
 	rotSpeed = { 1., 1., 1. };
-	scale = { .5,.5,.5 };
+	scale = { .48,.48,.48 };
 	localTransform = modelStack.top();				// start with sun's coordinate
 	localTransform *= glm::translate(glm::mat4(1.f),
 		glm::vec3(.81 * cos(speed[0] * dt) * dist[0], sin(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
@@ -435,14 +464,13 @@ void Graphics::ComputeTransforms(double dt, std::vector<float> speed, std::vecto
 	rmat = glm::rotate(glm::mat4(1.f), rotSpeed[0] * (float)dt, rotVector);
 	smat = glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
 }
-void Graphics::findClosestPlanet()
+void Graphics::findClosestPlanet(glm::vec3 currentLoc)
 {
 	glm::vec3 minDist = { 1000.f, 1000.f, 1000.f };
-	glm::vec3 currentPlayerLoc = m_camera->getCameraPos();
 	
 	for (int i = 0; i < 9; i++)
 	{
-		glm::vec3 distance = planetPos[i] - currentPlayerLoc;
+		glm::vec3 distance = planetPos[i] - currentLoc;
 		
 		if (glm::length(distance) < glm::length(minDist))
 		{
@@ -556,6 +584,10 @@ void Graphics::Render()
 			
 		}
 	}
+	glProgramUniform4fv(m_shader->GetShaderProgram(), mAmbLoc, 1, m_earth->matAmbient);
+	glProgramUniform4fv(m_shader->GetShaderProgram(), mDiffLoc, 1, m_earth->matDiff);
+	glProgramUniform4fv(m_shader->GetShaderProgram(), mSpecLoc, 1, m_earth->matSpec);
+	glProgramUniform1f(m_shader->GetShaderProgram(), mShineLoc, m_earth->matShininess);
 	for (int i = 0; i < asteroidBelt.size(); i++) {
 		if (asteroidBelt[i] != NULL){}
 			glUniform1i(m_hasTexture, false);
@@ -772,9 +804,30 @@ void Graphics::Render()
 			m_neptune->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
-	
+	//here for comet lighting update
+	glProgramUniform4fv(m_shader->GetShaderProgram(), mAmbLoc, 1, m_halley->matAmbient);
+	glProgramUniform4fv(m_shader->GetShaderProgram(), mDiffLoc, 1, m_halley->matDiff);
+	glProgramUniform4fv(m_shader->GetShaderProgram(), mSpecLoc, 1, m_halley->matSpec);
+	glProgramUniform1f(m_shader->GetShaderProgram(), mShineLoc, m_halley ->matShininess);
+	if (m_halley != NULL) {
+		glUniform1i(m_hasTexture, false);
+		//Create the invtranspose matrix for normal in shader
+		glUniformMatrix3fv(m_normalMatrix, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(m_camera->GetView() * m_sun->GetModel())))));
+		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_halley->GetModel()));
+		if (m_halley->hasTex) {
+			//glUniform1i(m_hasTexture, true);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, m_halley->getTextureID());
+			GLuint sampler = m_shader->GetUniformLocation("sp");
+			if (sampler == INVALID_UNIFORM_LOCATION)
+			{
+				printf("Sampler Not found not found\n");
+			}
+			glUniform1i(sampler, 0);
+			m_halley->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+		}
+	}
 
-	
 	// Get any errors from OpenGL
 	auto error = glGetError();
 	if (error != GL_NO_ERROR)

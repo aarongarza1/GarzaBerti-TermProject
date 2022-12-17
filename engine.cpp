@@ -2,7 +2,8 @@
 
 #include "engine.h"
 #include "glm/ext.hpp"
-
+#include <chrono>
+#include <thread>
 Engine::Engine(const char* name, int width, int height)
 {
   m_WINDOW_NAME = name;
@@ -40,7 +41,7 @@ bool Engine::Initialize()
   glfwSetInputMode(m_window->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetScrollCallback(m_window->getWindow(), scroll_callback);
   glfwSetCursorPosCallback(m_window->getWindow(), cursorPositionCallBack);
-
+  glfwSetKeyCallback(m_window->getWindow(), key_callback);
 
   // No errors
   return true;
@@ -63,10 +64,13 @@ void Engine::Run()
 void Engine::ProcessInput()
 {
     m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(m_window->getWindow(), true);
     if (!gameMode)
     {
-        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
-            glfwSetWindowShouldClose(m_window->getWindow(), true);
+        m_graphics->setGameMode(gameMode);
+        secondCameraPos = cameraPos;
+
         float cameraSpeed = 0.1;//static_cast<float>(2.5 * deltaTime);
         if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS)
         {
@@ -89,16 +93,46 @@ void Engine::ProcessInput()
             m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
         }
     }
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_F) == GLFW_PRESS)
+    {
+        gameMode = false;
+    }
     if (glfwGetKey(m_window->getWindow(), GLFW_KEY_E) == GLFW_PRESS)
     {
-        gameMode = -gameMode;
+        gameMode = true;
         m_graphics->setGameMode(gameMode);
         if (gameMode)
             fov == 45;
-        m_graphics->findClosestPlanet();
+        m_graphics->findClosestPlanet(secondCameraPos);
+        
         firstCameraPos = m_graphics->getClosestPlanet();
-        m_graphics->getCamera()->UpdateView(firstCameraPos + glm::vec3(0.0f, 0.0f, 1.0f), cameraFront, fov);
+        secondCameraPos = firstCameraPos;
+        m_graphics->getCamera()->UpdateView(firstCameraPos + gameModeOffsets[currOffset], cameraFront, fov);
     }
+    if (gameMode)
+    {
+        firstCameraPos = m_graphics->getClosestPlanet();
+        secondCameraPos = firstCameraPos;
+        m_graphics->getCamera()->UpdateView(firstCameraPos + gameModeOffsets[currOffset], cameraFront, fov);
+    }/*
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_RIGHT) == GLFW_RELEASE)
+        {
+            if (currentOffset + 1 > 5)
+                currentOffset = 0;
+            else
+                currentOffset += 1;
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_LEFT) == GLFW_RELEASE)
+        {
+            if (currentOffset - 1 < 0)
+                currentOffset = 5;
+            else
+                currentOffset -= 1;
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        
+    }*/
 
 
 
@@ -179,4 +213,21 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
         fov = 1.0f;
     if (fov > 45.0f)
         fov = 45.0f;
+}
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+    {
+        if (currOffset + 1 > 5)
+            currOffset = 0;
+        else
+            currOffset += 1;
+    }
+    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+    {
+        if (currOffset - 1 < 0)
+            currOffset = 5;
+        else
+            currOffset -= 1;
+    }
 }
