@@ -101,6 +101,17 @@ class Graphics
     Sphere* m_saturn;
     Sphere* m_uranus;
     Sphere* m_venus;
+    Sphere* m_marsMoon1;
+    Sphere* m_marsMoon2;
+    Sphere* m_jupMoon1;
+    Sphere* m_jupMoon2;
+    Sphere* m_satMoon1;
+    Sphere* m_satMoon2;
+    Sphere* m_satMoon3;
+    Sphere* m_uraMoon1;
+    Sphere* m_uraMoon2;
+    Sphere* m_nepMoon1;
+    Sphere* m_nepMoon2;
     Mesh* m_mesh;
     Mesh* m_halley;
     Cubemap* m_skybox;
