@@ -37,6 +37,10 @@ class Engine
     long long GetCurrentTimeMillis();
     void Display(GLFWwindow*, double);
     static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
+    void UpdateCamera() { m_graphics->getCamera()->UpdateView((m_graphics->getSpaceship()->getLocalBack() + glm::vec3(2.5, 2.5, 2.5) *  m_graphics->getSpaceship()->getForward()) + glm::vec3(0.0, 0.8, 0.0),
+        m_graphics->getSpaceship()->getLocalBack(),
+        m_graphics->getSpaceship()->getLocalUp(), 
+        fov); }
     
   
   private:
@@ -47,9 +51,12 @@ class Engine
     int m_WINDOW_HEIGHT;
     bool m_FULLSCREEN;
     bool gameMode;
+    bool change = false;
+    glm::mat4 spaceShip;
     glm::vec3 firstCameraPos;
     glm::vec3 secondCameraPos;
     Graphics *m_graphics;
+    glm::vec3 camOffset = { 2., 0.0, 2. };
     glm::vec3 gameModeOffsets[6] = {
         {0.0, 0.0, 1.2},
         {0.0, 0.0, -1.2},

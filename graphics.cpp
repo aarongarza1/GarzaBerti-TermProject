@@ -190,6 +190,10 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	glm::vec3 rotVector;
 	glm::mat4 localTransform;
 	// position of the sun	
+	//globalStack.push(glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 0)));  // sun's coordinate
+	//globalTransform = modelStack.top();		// The sun origin
+	//globalTransform *= glm::rotate(glm::mat4(1.0f), (float)dt, glm::vec3(0.f, 1.f, 0.f));
+	//globalTransform *= glm::scale(glm::vec3(1., 1., 1.));
 	modelStack.push(glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 0)));  // sun's coordinate
 	localTransform = modelStack.top();		// The sun origin
 	localTransform *= glm::rotate(glm::mat4(1.0f), (float)dt, glm::vec3(0.f, 1.f, 0.f));
@@ -197,26 +201,43 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	if (m_sun != NULL)
 		m_sun->Update(localTransform);
 	planetPos[0] = localTransform[3];
-	//position of the spaceship
-	speed = { 0, -1, -1 };
-	dist = { 0., 1.5, 1.5 };
-	rotVector = { -1.,0.,0. };
-	rotSpeed = { 1, .3, -3 };
-	scale = { .012f, .012f, .012f };
-	localTransform = modelStack.top();
-	localTransform *= glm::translate(glm::mat4(1.f),
-		glm::vec3(cos(speed[0] * dt) * dist[0], cos(speed[1] * dt) * dist[1], sin(speed[2] * dt) * dist[2]));
-	modelStack.push(localTransform);			// store moon-planet-sun coordinate
-	localTransform *= glm::rotate(glm::mat4(1.f), rotSpeed[0] * (float)dt, rotVector);
-	localTransform *= glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
-
-	if (m_mesh != NULL)
-		m_mesh->Update(localTransform);
 
 
-	modelStack.pop();
+	//position of spaceship
+	/*speed = {.5, 0, .5};
+	dist = { 2., 0., 2. };
+	rotVector = { 0.,1.,0. };
+	rotSpeed = { 1., 1., 1. };*/
+	scale = { .01f, .01f, .01f };
+	localTransform = modelStack.top();	// start with sun's coordinate
+	if (first)
+	{
+		localTransform *= glm::translate(glm::mat4(1.f), glm::vec3(0.0, 2.0, 0.0));
+		localTransform *= glm::translate(glm::mat4(1.f), -engineSpeed * m_mesh->getForward());
+		modelStack.push(localTransform);			// store planet-sun coordinate
+		//localTransform *= glm::rotate(glm::mat4(1.f), rotSpeex, glm::vec3(1., 0., 0.));
+		//localTransform *= glm::rotate(glm::mat4(1.f), rotSpeey, glm::vec3(0., 1., 0.));
+		//localTransform *= glm::rotate(glm::mat4(1.f), rotSpeez, glm::vec3(0., 0., 1.));
+		localTransform *= glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
 
+		if (m_mesh != NULL)
+			m_mesh->Update(localTransform, 1);
+		modelStack.pop();
+	}
 
+	else
+	{
+		myTransform *= glm::translate(glm::mat4(1.f),
+			engineSpeed);
+		modelStack.push(myTransform);			// store planet-sun coordinate
+		//myTransform *= glm::rotate(glm::mat4(1.f), rotSpee, rotVecto);
+		myTransform *= glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
+
+		if (m_mesh != NULL)
+			m_mesh->Update(myTransform);
+		modelStack.pop();
+	}
+	
 
 	//position of Halley's Comet
 	speed = { .5, 0, .5 };
@@ -480,6 +501,11 @@ void Graphics::findClosestPlanet(glm::vec3 currentLoc)
 	}
 
 
+}
+
+glm::vec3 Graphics::getSpaceshipPos()
+{
+	return spaceShipPos;
 }
 glm::vec3 Graphics::getClosestPlanet()
 {

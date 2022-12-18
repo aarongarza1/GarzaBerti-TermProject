@@ -31,8 +31,24 @@ class Graphics
     Camera* getCamera() { return m_camera; }
     float toRadians(float degrees) { return (degrees * 2.0f * 3.14159f) / 360.0f; }
     int getPlanetPort() { return planetPort;  }
+    Mesh* getSpaceship() { return m_mesh; }
     glm::vec3 getClosestPlanet();
+    void setFirst(bool change) { }
+    glm::mat4 getCurrentRot();
+    glm::vec3 getSpaceshipPos();
+
+    void setSpeed(glm::vec3 speed) { m_mesh->setSpeed(speed);  engineSpeed += speed; }
+    void setRot(glm::vec3 rotVec, glm::vec3 rotSpd) { m_mesh->UpdateVars(rotSpd);  rotVecto = rotVec; rotSpeex += rotSpd.x; rotSpeey += rotSpd.y; rotSpeez += rotSpd.z; }
   private:
+
+      bool first = true;
+      glm::mat4 myTransform;
+      glm::mat4 globalTransform;
+    glm::vec3 engineSpeed = { 0.f, 1.f, 0.f };
+    glm::vec3 rotVecto = { 0.f, 0.f, 0.f };
+    float rotSpeex = 0.f;
+    float rotSpeey = 0.f;
+    float rotSpeez = 0.f;
     std::string ErrorString(GLenum error);
     int planetPort;
     bool collectShPrLocs();
@@ -42,6 +58,7 @@ class Graphics
     //glm::vec3 position = matrix[3];
     glm::vec3 planetPos[9];
     stack<glm::mat4> modelStack;
+    stack<glm::mat4> globalStack;
     bool gameMode;
     Camera *m_camera;
     Shader *m_shader;
@@ -54,7 +71,8 @@ class Graphics
     GLint m_colorAttrib;
     GLint m_tcAttrib;
     GLint m_hasTexture;
-
+    glm::mat4 currentRot;
+    glm::vec3 spaceShipPos;
     //light stuff
     GLint globalAmbLoc;
     GLint lightALoc;

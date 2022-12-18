@@ -10,8 +10,7 @@ int main(int argc, char **argv)
   srand(time(0));
   int x =3;
   
-  while (x != 0)
-  {
+
       std::cout << "Would you like to play?\n0. Exit\n1. Play" << std::endl;
       std::cin >> x;
       switch (x)
@@ -33,7 +32,7 @@ int main(int argc, char **argv)
           std::cout << "Invalid value" << std::endl;
           break;
       }
-  }
+  
 
   return 0;
 }

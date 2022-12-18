@@ -68,36 +68,91 @@ void Engine::ProcessInput()
         glfwSetWindowShouldClose(m_window->getWindow(), true);
     if (!gameMode)
     {
+        
+        //glfwSetCursorPosCallback(m_window->getWindow(), NULL);
         m_graphics->setGameMode(gameMode);
         secondCameraPos = cameraPos;
-
         float cameraSpeed = 0.1;//static_cast<float>(2.5 * deltaTime);
+        
         if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS)
         {
-            cameraPos += cameraSpeed * cameraFront;
-            m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
+            if (change)
+            {
+                m_graphics->setFirst(false);
+            }
+           change = true;
+            m_graphics->setRot(glm::vec3(-1., 0., 0.), glm::vec3(.01, 0., 0.));
         }
         if (glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS)
         {
-            cameraPos -= cameraSpeed * cameraFront;
-            m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
+            if (change)
+            {
+                m_graphics->setFirst(false);
+            }
+            change = true;
+            m_graphics->setRot(glm::vec3(1., 0., 0.), glm::vec3(-.01, 0., 0.));
         }
         if (glfwGetKey(m_window->getWindow(), GLFW_KEY_A) == GLFW_PRESS)
         {
-            cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-            m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
+            if (change)
+            {
+                m_graphics->setFirst(false);
+            }
+           change = true;
+            m_graphics->setRot(glm::vec3(0., 0., -1.), glm::vec3(0., 0., -.01));
         }
         if (glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS)
         {
-            cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-            m_graphics->getCamera()->UpdateView(cameraPos, cameraFront, fov);
+            if (change)
+            {
+                m_graphics->setFirst(false);
+            }
+          change = true;
+            m_graphics->setRot(glm::vec3(0., 0., 1.), glm::vec3(0., 0., .01));
         }
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_E) == GLFW_PRESS)
+        {
+            if (change)
+            {
+                m_graphics->setFirst(false);
+            }
+           change = true;
+            m_graphics->setRot(glm::vec3(0., -1., 0.), glm::vec3(0., .01, 0.));
+        }
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_Q) == GLFW_PRESS)
+        {
+            if (change)
+            {
+                m_graphics->setFirst(false);
+            }
+            change = true;
+            m_graphics->setRot(glm::vec3(0., 1., 0.), glm::vec3(0., -.01, 0.));
+        }
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        {
+            if (change)
+            {
+                m_graphics->setFirst(false);
+            }
+           change = true;
+            m_graphics->setSpeed(glm::vec3(0.02, 0.02, 0.02));
+        }
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+        {
+            if (change)
+            {
+                m_graphics->setFirst(false);
+            }
+            change = true;
+            m_graphics->setSpeed(glm::vec3(-0.02, -0.02, -0.02));
+        }
+        UpdateCamera();
     }
     if (glfwGetKey(m_window->getWindow(), GLFW_KEY_F) == GLFW_PRESS)
     {
         gameMode = false;
     }
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_E) == GLFW_PRESS)
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_R) == GLFW_PRESS)
     {
         gameMode = true;
         m_graphics->setGameMode(gameMode);
@@ -111,6 +166,7 @@ void Engine::ProcessInput()
     }
     if (gameMode)
     {
+        glfwSetKeyCallback(m_window->getWindow(), key_callback);
         firstCameraPos = m_graphics->getClosestPlanet();
         secondCameraPos = firstCameraPos;
         m_graphics->getCamera()->UpdateView(firstCameraPos + gameModeOffsets[currOffset], cameraFront, fov);
@@ -169,6 +225,7 @@ void Engine::Display(GLFWwindow* window, double time) {
     m_graphics->Render();
     m_window->Swap();
     m_graphics->HierarchicalUpdate2(time);
+        
 }
 
 static void cursorPositionCallBack(GLFWwindow* window, double xpos, double ypos) {

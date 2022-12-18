@@ -44,7 +44,6 @@ Mesh::Mesh(glm::vec3 pivot, const char* fname, const char* tname)
 	angle = 0.0f;
 	pivotLocation = pivot;
 	model = glm::translate(glm::mat4(1.0f), pivotLocation);
-
 	// Buffer Set Up
 	if (!InitBuffers()) {
 		printf("some buffers not initialized.\n");
@@ -68,12 +67,28 @@ Mesh::~Mesh()
 void Mesh::Update(glm::mat4 inmodel)
 {
 	model = inmodel;
-	model *= glm::rotate(glm::mat4(1.0), 0.f, glm::vec3(0.0f, 0.0f, 1.0f));
-	//model *= glm::rotate(glm::mat4(1.0), 3.14f, glm::vec3(0.0f, 0.0f, 1.0f));
-	model *= glm::rotate(glm::mat4(1.0), 3.2f, glm::vec3(0.0f, 1.0f, 0.0f));
-
+	localBack = glm::vec3(inmodel[3][0], inmodel[3][1], inmodel[3][2]);
+	localUp = glm::vec3(inmodel[1][0], inmodel[1][1], inmodel[1][2]);
+	inverted = glm::inverse(inmodel);
+	forward = normalize(glm::vec3(inverted[2]) * glm::vec3(1, 1, -1));
 }
-
+void Mesh::UpdateVars(glm::vec3 rotStuff)
+{
+	rotSpeex += rotStuff.x;
+	rotSpeey += -rotStuff.y;
+	rotSpeez += rotStuff.z;
+}
+void Mesh::Update(glm::mat4 inmodel, bool fix)
+{
+	model = inmodel;
+	model *= glm::rotate(glm::mat4(1.f), rotSpeex, glm::vec3(1., 0., 0.));
+	model *= glm::rotate(glm::mat4(1.f), rotSpeey, glm::vec3(0., 1., 0.));
+	model *= glm::rotate(glm::mat4(1.f), rotSpeez, glm::vec3(0., 0., 1.));
+	localBack = glm::vec3(model[3][0], model[3][1], model[3][2]);
+	localUp = glm::vec3(model[1][0], model[1][1], model[1][2]);
+	inverted = glm::inverse(model);
+	forward = normalize(glm::vec3(inverted[2]) * glm::vec3(1, 1, -1));
+}
 glm::mat4 Mesh::GetModel()
 {
 	return model;
