@@ -5,7 +5,7 @@
 #include <assert.h>
 #include "window.h"
 #include "graphics.h"
-
+#include "graphics_headers.h"
 static void cursorPositionCallBack(GLFWwindow*, double xpos, double ypos);
 static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);

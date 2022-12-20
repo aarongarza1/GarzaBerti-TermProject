@@ -71,7 +71,7 @@ void Engine::ProcessInput()
         
         //glfwSetCursorPosCallback(m_window->getWindow(), NULL);
         m_graphics->setGameMode(gameMode);
-        secondCameraPos = cameraPos;
+        secondCameraPos = m_graphics->getCamera()->getCameraPos();
         float cameraSpeed = 0.1;//static_cast<float>(2.5 * deltaTime);
         
         if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS)
@@ -144,7 +144,7 @@ void Engine::ProcessInput()
                 m_graphics->setFirst(false);
             }
             change = true;
-            m_graphics->setSpeed(glm::vec3(-0.02, -0.02, -0.02));
+            m_graphics->setSpeed(glm::vec3(-0.03, -0.03, -0.03));
         }
         UpdateCamera();
     }

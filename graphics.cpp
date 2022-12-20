@@ -141,6 +141,8 @@ bool Graphics::Initialize(int width, int height)
 	m_uranus = new Sphere(48, "assets\\Uranus.jpg", "assets\\Uranus-n.jpg");
 	m_venus = new Sphere(48, "assets\\Venus.jpg", "assets\\Venus-n.jpg");
 	m_skybox = new Cubemap();
+
+	m_light = new Light(lightAmbient, lightDiffuse, lightSpecular, globalAmbient, lightPos);
 	//m_skybox = new Cubemap(glm::vec3(0., 0., 0.), "assets\\17520.jpg");
 	for (int i = 0; i < 6; i++)
 	{
@@ -182,6 +184,22 @@ bool Graphics::Initialize(int width, int height)
 	{
 		randomFloats3.push_back(((float(rand()) / float(RAND_MAX)) * (.7 - -.7)) + -.7);
 	}
+	globalAmbient[0] = m_light->getGlobal()[0];
+	globalAmbient[1] = m_light->getGlobal()[1];
+	globalAmbient[2] = m_light->getGlobal()[2];
+	globalAmbient[3] = m_light->getGlobal()[3];
+	lightAmbient[0] = m_light->getAmbient()[0];
+	lightAmbient[1] = m_light->getAmbient()[1];
+	lightAmbient[2] = m_light->getAmbient()[2];
+	lightAmbient[3] = m_light->getAmbient()[3];
+	lightDiffuse[0] = m_light->getDiffuse()[0];
+	lightDiffuse[1] = m_light->getDiffuse()[1];
+	lightDiffuse[2] = m_light->getDiffuse()[2];
+	lightDiffuse[3] = m_light->getDiffuse()[3];
+	lightSpecular[0] = m_light->getSpec()[0];
+	lightSpecular[1] = m_light->getSpec()[1];
+	lightSpecular[2] = m_light->getSpec()[2];
+	lightSpecular[3] = m_light->getSpec()[3];
 	glProgramUniform4fv(m_shader->GetShaderProgram(), globalAmbLoc, 1, globalAmbient);
 	glProgramUniform4fv(m_shader->GetShaderProgram(), lightALoc, 1, lightAmbient);
 	glProgramUniform4fv(m_shader->GetShaderProgram(), lightDLoc, 1, lightDiffuse);
@@ -739,10 +757,10 @@ void Graphics::Render()
 	lightPos[0] = transformed.x;
 	lightPos[1] = transformed.y;
 	lightPos[2] = transformed.z;*/
-	lightPos[0] = 0.0;
-	lightPos[1] = 0.0;
-	lightPos[2] = 0.0;
-	glProgramUniform3fv(m_shader->GetShaderProgram(), lightPosLoc, 1, lightPos);
+	lightPos[0] = m_light->getPosition()[0];
+	lightPos[1] = m_light->getPosition()[1];
+	lightPos[2] = m_light->getPosition()[2];
+	glProgramUniform3fv(m_shader->GetShaderProgram(), lightPosLoc, 1,lightPos);
 	// Send in the projection and view to the shader (stay the same while camera intrinsic(perspective) and extrinsic (view) parameters are the same
 	glUniformMatrix4fv(m_projectionMatrix, 1, GL_FALSE, glm::value_ptr(m_camera->GetProjection()));
 	glUniformMatrix4fv(m_viewMatrix, 1, GL_FALSE, glm::value_ptr(m_camera->GetView()));

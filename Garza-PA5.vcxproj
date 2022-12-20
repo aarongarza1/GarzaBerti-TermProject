@@ -27,6 +27,7 @@
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="object.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="sphere.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="window.cpp" />
@@ -37,6 +38,7 @@
     <ClInclude Include="engine.h" />
     <ClInclude Include="graphics.h" />
     <ClInclude Include="graphics_headers.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="object.h" />
@@ -44,6 +46,9 @@
     <ClInclude Include="sphere.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -98,10 +103,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>D:\CS480\Code\CS480TemplateCode\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>D:\OpenGL-Libs\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>D:\CS480\Code\CS480TemplateCode\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>D:\OpenGL-Libs\include;D:\CS480\Code\CS480TemplateCode\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -141,7 +146,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\CS480\Code\CS480TemplateCode\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\OpenGL-Libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32.lib;glfw3.lib;soil2-debug.lib;opengl32.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -159,7 +164,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\CS480\Code\CS480TemplateCode\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\OpenGL-Libs\lib;D:\CS480\Code\CS480TemplateCode\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32.lib;glfw3.lib;soil2-debug.lib;opengl32.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

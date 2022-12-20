@@ -12,7 +12,7 @@ using namespace std;
 #include "sphere.h"
 #include "mesh.h"
 #include "Cubemap.h"
-
+#include "Light.h"
 #define numVBOs 2;
 #define numIBs 2;
 
@@ -120,7 +120,7 @@ class Graphics
     std::vector<float> randomFloats1;
     std::vector<float> randomFloats2;
     std::vector<float> randomFloats3;
-
+    Light* m_light;
 
 
 
